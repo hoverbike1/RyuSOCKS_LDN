@@ -95,12 +95,14 @@ namespace RyuSocks.Packets
 
         public override void Validate()
         {
+            base.Validate();
+
             // Minimum length: RSV(2) + FRAG(1) + 0x03 + 0x01 + FQDN(1) + PORT(2) = 8
             const int MinimumLength = 8;
 
             if (Bytes.Length < MinimumLength)
             {
-                throw new InvalidOperationException($"Invalid packet length: {Bytes.Length} (Expected: <= {MinimumLength})");
+                throw new InvalidOperationException($"Invalid packet length: {Bytes.Length} (Expected: >= {MinimumLength})");
             }
 
             if (Reserved != 0)

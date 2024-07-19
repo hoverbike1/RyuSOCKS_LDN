@@ -63,6 +63,8 @@ namespace RyuSocks.Packets
 
         public override void Validate()
         {
+            base.Validate();
+
             // Minimum length: VER(1) + CMD(1) + RSV(1) + 0x03 + 0x01 + FQDN(1) + PORT(2) = 8
             const int MinimumLength = 8;
             // Maximum length: VER(1) + CMD(1) + RSV(1) + 0x03 + 0xFF + FQDN(0xFF) + PORT(2) = 262

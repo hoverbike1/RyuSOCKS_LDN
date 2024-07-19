@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New properties for `Command` implementations to control communication
   with the proxy server.
 - New method `Packet.IsValid()` which returns a bool instead of throwing exceptions. 
+- `Validate()` implementation for `EndPointPacket`.
 
 ### Changed
 
