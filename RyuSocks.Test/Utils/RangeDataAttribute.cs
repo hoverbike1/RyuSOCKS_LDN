@@ -19,14 +19,14 @@ using Xunit.Sdk;
 
 namespace RyuSocks.Test.Utils
 {
-    public class RangeData<T> : DataAttribute
+    public class RangeDataAttribute<T> : DataAttribute
         where T : INumber<T>
     {
         private readonly T _min;
         private readonly T _max;
         private readonly T[] _extraElements;
 
-        public RangeData(T min, T max, params T[] extraElements)
+        public RangeDataAttribute(T min, T max, params T[] extraElements)
         {
             _min = min;
             _max = max;

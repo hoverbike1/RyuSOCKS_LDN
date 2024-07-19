@@ -21,20 +21,20 @@ using Xunit.Sdk;
 
 namespace RyuSocks.Test.Utils
 {
-    public class StringData : DataAttribute
+    public class StringDataAttribute : DataAttribute
     {
         private readonly int _min;
         private readonly int _max;
         private int _count;
 
-        public StringData(int min, int max, int count)
+        public StringDataAttribute(int min, int max, int count)
         {
             _min = min;
             _max = max;
             _count = count;
         }
 
-        public StringData(int firstLength, int secondLength)
+        public StringDataAttribute(int firstLength, int secondLength)
         {
             _min = firstLength;
             _max = secondLength;

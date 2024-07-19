@@ -19,7 +19,7 @@ using Xunit.Sdk;
 
 namespace RyuSocks.Test.Utils
 {
-    public class EnumData<T> : DataAttribute
+    public class EnumDataAttribute<T> : DataAttribute
         where T : struct, Enum
     {
         public override IEnumerable<object[]> GetData(MethodInfo testMethod)
