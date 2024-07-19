@@ -23,7 +23,10 @@ namespace RyuSocks.Packets
         /// <summary>
         /// The contents of the packet.
         /// </summary>
-        public byte[] Bytes { get; protected init; }
+        public byte[] Bytes { get; protected set; }
+
+        /// <inheritdoc cref="Bytes"/>
+        public Span<byte> AsSpan() => Bytes;
 
         /// <summary>
         /// Validate the structure of the packet.
@@ -31,8 +34,6 @@ namespace RyuSocks.Packets
         /// </summary>
         public abstract void Validate();
 
-        /// <inheritdoc cref="Bytes"/>
-        public Span<byte> AsSpan() => Bytes;
 
         protected Packet() { }
 
