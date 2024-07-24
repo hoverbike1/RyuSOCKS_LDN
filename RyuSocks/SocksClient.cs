@@ -29,7 +29,7 @@ using System.Net.Sockets;
 
 namespace RyuSocks
 {
-    public partial class SocksClient
+    public partial class SocksClient : IDisposable
     {
         // TODO: Keep track of the connection state
 
@@ -73,6 +73,25 @@ namespace RyuSocks
             Auth = oldSocket.Auth;
             RequestCommand = oldSocket.RequestCommand;
             OfferedAuthMethods = oldSocket.OfferedAuthMethods;
+        }
+
+        /// <inheritdoc cref="Socket.Dispose"/>
+        public void Dispose()
+        {
+            _socket.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc cref="Socket.Close()"/>
+        public void Close()
+        {
+            _socket.Close();
+        }
+
+        /// <inheritdoc cref="Socket.Close(int)"/>
+        public void Close(int timeout)
+        {
+            _socket.Close(timeout);
         }
 
         public void Authenticate()

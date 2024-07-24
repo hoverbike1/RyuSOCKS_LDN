@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   with the proxy server.
 - New method `Packet.IsValid()` which returns a bool instead of throwing exceptions. 
 - `Validate()` implementation for `EndPointPacket`.
+- `Socket.Close()` and `Socket.Dispose()` methods are exposed by `SocksClient` now.
 
 ### Changed
 
