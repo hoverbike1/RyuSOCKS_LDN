@@ -17,17 +17,31 @@
 using RyuSocks.Auth;
 using RyuSocks.Auth.Extensions;
 using RyuSocks.Test.Utils;
+using RyuSocks.Types;
 using System;
 using Xunit;
 
 
 namespace RyuSocks.Test.Auth
 {
-    public class AuthMethodTests
+    public class AuthMethodExtensionsTests
     {
+        public static readonly TheoryData<AuthMethod, IProxyAuth> AuthImplObjects = new()
+        {
+            { AuthMethod.NoAuth, new NoAuth() },
+            { AuthMethod.GSSAPI, new GSSAPI() },
+            { AuthMethod.UsernameAndPassword, new UsernameAndPassword() },
+            { AuthMethod.CHAP, new CHAP() },
+            { AuthMethod.CRAM, new CRAM() },
+            { AuthMethod.SSL, new SSL() },
+            { AuthMethod.NDS, new NDS() },
+            { AuthMethod.MAF, new MAF() },
+            { AuthMethod.JSONParameterBlock, new JSONParameterBlock() },
+        };
+
         [Theory]
         [EnumData<AuthMethod>]
-        public void GetAuth_ReturnValue(AuthMethod authMethod)
+        public void GetAuth_ReturnsInstance(AuthMethod authMethod)
         {
             switch (authMethod)
             {
@@ -61,7 +75,42 @@ namespace RyuSocks.Test.Auth
                 case AuthMethod.NoAcceptableMethods:
                     Assert.Throws<ArgumentException>(() => authMethod.GetAuth());
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(authMethod), authMethod, "Missing test case.");
             }
+        }
+
+        [Theory]
+#pragma warning disable xUnit1045 // Avoid using TheoryData type arguments that might not be serializable
+        [MemberData(nameof(AuthImplObjects))]
+#pragma warning restore xUnit1045
+        public void GetAuth_ReturnsEnumValue(AuthMethod authMethod, IProxyAuth authImpl)
+        {
+            Assert.Equal(authMethod, authImpl.GetAuth());
+        }
+
+        [Fact]
+        public void GetAuth_ThrowsOnUnknownImpl()
+        {
+            Assert.Throws<ArgumentException>(() => new UnknownAuth().GetAuth());
+        }
+    }
+
+    internal class UnknownAuth : IProxyAuth
+    {
+        public ReadOnlySpan<byte> Wrap(ReadOnlySpan<byte> packet, ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Span<byte> Unwrap(Span<byte> packet, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Authenticate(ReadOnlySpan<byte> incomingPacket, out ReadOnlySpan<byte> outgoingPacket)
+        {
+            throw new NotImplementedException();
         }
     }
 }
