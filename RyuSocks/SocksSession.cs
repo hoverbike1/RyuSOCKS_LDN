@@ -31,10 +31,10 @@ namespace RyuSocks
 {
     public partial class SocksSession : TcpSession
     {
-        protected bool IsClosing;
-        protected bool IsAuthenticated;
-        protected IProxyAuth Auth;
-        protected ServerCommand Command;
+        public bool IsClosing { get; protected set; }
+        public bool IsAuthenticated { get; protected set; }
+        public IProxyAuth Auth { get; protected set; }
+        public ServerCommand Command { get; protected set; }
 
         public new SocksServer Server => base.Server as SocksServer;
 

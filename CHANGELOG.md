@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Throw `ArgumentOutOfRangeException` instead of `ArgumentException`
   if the length of the domain name is invalid for `EndpointPackets`.
 - Replaced init-only setter for `Packet.Bytes` with a regular setter.
+- Replaced protected fields of `SocksSession` with public properties
+  containing a protected setter.
 
 ### Fixed
 
