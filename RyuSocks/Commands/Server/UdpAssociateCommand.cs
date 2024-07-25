@@ -50,24 +50,28 @@ namespace RyuSocks.Commands.Server
             // CommandResponse sent by UdpServer.OnStarted() below.
         }
 
-        public override ReadOnlySpan<byte> Wrap(ReadOnlySpan<byte> buffer, ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public override int Wrap(Span<byte> buffer, int packetLength, ProxyEndpoint remoteEndpoint)
         {
-            UdpPacket packet = new(remoteEndpoint, buffer.Length);
-            buffer.CopyTo(packet.UserData);
-            wrapperLength = packet.HeaderLength;
+            UdpPacket packet = new(remoteEndpoint, packetLength);
+            buffer[..packetLength].CopyTo(packet.UserData);
             packet.Validate();
 
-            return packet.AsSpan();
+            buffer.Clear();
+            packet.AsSpan().CopyTo(buffer);
+
+            return packet.Bytes.Length;
         }
 
-        public override Span<byte> Unwrap(Span<byte> buffer, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public override int Unwrap(Span<byte> buffer, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
-            UdpPacket packet = new(buffer.ToArray());
+            UdpPacket packet = new(buffer[..packetLength].ToArray());
             remoteEndpoint = packet.ProxyEndpoint;
-            wrapperLength = packet.HeaderLength;
             packet.Validate();
 
-            return packet.UserData;
+            buffer.Clear();
+            packet.UserData.CopyTo(buffer);
+
+            return packet.Bytes.Length;
         }
 
         public override int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)
@@ -142,7 +146,17 @@ namespace RyuSocks.Commands.Server
 
                 if (IsClientEndpoint(endpoint))
                 {
-                    bufferSpan = _command.Session.Unwrap(bufferSpan, out ProxyEndpoint remoteEndpoint, out _);
+                    int bufferLength = bufferSpan.Length;
+                    int requiredWrapperSpace = _command.Session.GetRequiredWrapperSpace();
+
+                    if (requiredWrapperSpace != 0)
+                    {
+                        byte[] wrapperBuffer = new byte[bufferSpan.Length + requiredWrapperSpace];
+                        bufferSpan.CopyTo(wrapperBuffer);
+                        bufferSpan = wrapperBuffer;
+                    }
+
+                    bufferLength = _command.Session.Unwrap(bufferSpan, bufferLength, out ProxyEndpoint remoteEndpoint);
 
                     if (!_destinationEndpoints.Contains(remoteEndpoint) && !_command.Session.IsDestinationValid(remoteEndpoint))
                     {
@@ -151,7 +165,7 @@ namespace RyuSocks.Commands.Server
 
                     _destinationEndpoints.Add(remoteEndpoint);
 
-                    this.SendAsync(remoteEndpoint.ToEndPoint(), bufferSpan);
+                    this.SendAsync(remoteEndpoint.ToEndPoint(), bufferSpan[..bufferLength]);
 
                     return;
                 }

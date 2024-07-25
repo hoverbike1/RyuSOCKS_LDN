@@ -26,6 +26,8 @@ namespace RyuSocks.Auth
     [AuthMethodImpl(0x00)]
     public class NoAuth : IProxyAuth
     {
+        public int WrapperLength => 0;
+
         public bool Authenticate(ReadOnlySpan<byte> incomingPacket, out ReadOnlySpan<byte> outgoingPacket)
         {
             // Nothing to do here.
@@ -33,17 +35,15 @@ namespace RyuSocks.Auth
             return true;
         }
 
-        public ReadOnlySpan<byte> Wrap(ReadOnlySpan<byte> packet, ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public int Wrap(Span<byte> packet, int packetLength, ProxyEndpoint remoteEndpoint)
         {
-            wrapperLength = 0;
-            return packet;
+            return packetLength;
         }
 
-        public Span<byte> Unwrap(Span<byte> packet, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
             remoteEndpoint = null;
-            wrapperLength = 0;
-            return packet;
+            return packetLength;
         }
     }
 }

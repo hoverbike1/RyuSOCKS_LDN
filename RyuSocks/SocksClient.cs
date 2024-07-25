@@ -94,6 +94,23 @@ namespace RyuSocks
             _socket.Close(timeout);
         }
 
+        public int GetRequiredWrapperSpace()
+        {
+            int wrapperSpace = 0;
+
+            if (Authenticated)
+            {
+                wrapperSpace = Auth.WrapperLength;
+            }
+
+            if (Command is { Accepted: true } && wrapperSpace < Command.WrapperLength)
+            {
+                wrapperSpace = Command.WrapperLength;
+            }
+
+            return wrapperSpace;
+        }
+
         public void Authenticate()
         {
             if (Authenticated)
@@ -323,33 +340,40 @@ namespace RyuSocks
 
         public int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
-            int totalWrapperLength = 0;
-            int wrapperLength;
-
             if (Command is { UsesDatagrams: true })
             {
                 throw new InvalidOperationException($"{nameof(Send)} can't be used when sending datagrams.");
             }
 
+            int bufferLength = buffer.Length;
+            int bufferSize = bufferLength + GetRequiredWrapperSpace();
+
+            byte[] sendBufferArray = buffer.ToArray();
+            Span<byte> sendBuffer = sendBufferArray;
+
+            if (bufferLength != bufferSize)
+            {
+                Array.Resize(ref sendBufferArray, bufferSize);
+                sendBuffer = sendBufferArray;
+            }
+
             if (Command is { Accepted: true })
             {
-                buffer = Command.Wrap(buffer, null, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                bufferLength = Command.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (Authenticated)
             {
-                buffer = Auth.Wrap(buffer, null, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                bufferLength = Auth.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (Command is { Ready: true, HandlesCommunication: true })
             {
                 errorCode = SocketError.Success;
-                return Command.Send(buffer) - totalWrapperLength;
+                return Command.Send(sendBuffer[..bufferLength]);
             }
 
-            return _socket.Send(buffer, socketFlags, out errorCode) - totalWrapperLength;
+            return _socket.Send(sendBuffer[..bufferLength], socketFlags, out errorCode);
         }
 
         public int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags) => Send(buffer, socketFlags, out _);
@@ -357,13 +381,12 @@ namespace RyuSocks
 
         public int Receive(Span<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
-            int bytesReceived;
-            int wrapperLength;
-
             if (Command is { UsesDatagrams: true })
             {
                 throw new InvalidOperationException($"{nameof(Receive)} can't be used when receiving datagrams.");
             }
+
+            int bytesReceived;
 
             if (Command is { Ready: true, HandlesCommunication: true })
             {
@@ -378,16 +401,12 @@ namespace RyuSocks
 
             if (Authenticated)
             {
-                // TODO: Make sure this works as expected.
-                // TODO: The signature of Unwrap needs to be changed to return void.
-                Auth.Unwrap(buffer, out ProxyEndpoint _, out wrapperLength);
-                bytesReceived -= wrapperLength;
+                bytesReceived = Auth.Unwrap(buffer, bytesReceived, out ProxyEndpoint _);
             }
 
             if (Command is { Accepted: true })
             {
-                Command.Unwrap(buffer, out ProxyEndpoint _, out wrapperLength);
-                bytesReceived -= wrapperLength;
+                bytesReceived = Command.Unwrap(buffer, bytesReceived, out ProxyEndpoint _);
             }
 
             return bytesReceived;
@@ -395,9 +414,6 @@ namespace RyuSocks
 
         public int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
-            int totalWrapperLength = 0;
-            int wrapperLength;
-
             if (Command is { UsesDatagrams: false })
             {
                 throw new InvalidOperationException($"{nameof(SendTo)} can only be used when sending datagrams.");
@@ -412,24 +428,34 @@ namespace RyuSocks
                     $"Only {nameof(IPEndPoint)} and {nameof(DnsEndPoint)} can be used.")
             };
 
+            int bufferLength = buffer.Length;
+            int bufferSize = bufferLength + GetRequiredWrapperSpace();
+
+            byte[] sendBufferArray = buffer.ToArray();
+            Span<byte> sendBuffer = sendBufferArray;
+
+            if (bufferLength != bufferSize)
+            {
+                Array.Resize(ref sendBufferArray, bufferSize);
+                sendBuffer = sendBufferArray;
+            }
+
             if (Command is { Accepted: true })
             {
-                buffer = Command.Wrap(buffer, remoteEndpoint, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                bufferLength = Command.Wrap(sendBuffer, bufferLength, remoteEndpoint);
             }
 
             if (Authenticated)
             {
-                buffer = Auth.Wrap(buffer, remoteEndpoint, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                bufferLength = Auth.Wrap(sendBuffer, bufferLength, remoteEndpoint);
             }
 
             if (Command is { Ready: true })
             {
-                return Command.SendTo(buffer, remoteEP) - totalWrapperLength;
+                return Command.SendTo(sendBuffer[..bufferLength], remoteEP);
             }
 
-            return _socket.SendTo(buffer, socketFlags, remoteEP) - totalWrapperLength;
+            return _socket.SendTo(sendBuffer[..bufferLength], socketFlags, remoteEP);
         }
 
         public int SendTo(ReadOnlySpan<byte> buffer, EndPoint remoteEP) => SendTo(buffer, SocketFlags.None, remoteEP);
@@ -443,14 +469,10 @@ namespace RyuSocks
 
             // TODO: Fix the signature of SendTo/ReceiveTo methods for commands
             int bytesReceived = Command.ReceiveFrom(buffer, ref remoteEP);
-            int wrapperLength;
 
             if (Authenticated)
             {
-                // TODO: Make sure this works as expected.
-                // TODO: The signature of Unwrap needs to be changed to return void.
-                Auth.Unwrap(buffer, out ProxyEndpoint remoteEndpoint, out wrapperLength);
-                bytesReceived -= wrapperLength;
+                bytesReceived = Auth.Unwrap(buffer, bytesReceived, out ProxyEndpoint remoteEndpoint);
 
                 if (remoteEndpoint != null)
                 {
@@ -460,8 +482,7 @@ namespace RyuSocks
 
             if (Command is { Accepted: true })
             {
-                Command.Unwrap(buffer, out ProxyEndpoint remoteEndpoint, out wrapperLength);
-                bytesReceived -= wrapperLength;
+                bytesReceived = Command.Unwrap(buffer, bytesReceived, out ProxyEndpoint remoteEndpoint);
 
                 if (remoteEndpoint != null)
                 {

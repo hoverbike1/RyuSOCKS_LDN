@@ -98,12 +98,14 @@ namespace RyuSocks.Test.Auth
 
     internal class UnknownAuth : IProxyAuth
     {
-        public ReadOnlySpan<byte> Wrap(ReadOnlySpan<byte> packet, ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public int WrapperLength => throw new NotImplementedException();
+
+        public int Wrap(Span<byte> packet, int packetLength, ProxyEndpoint remoteEndpoint)
         {
             throw new NotImplementedException();
         }
 
-        public Span<byte> Unwrap(Span<byte> packet, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
             throw new NotImplementedException();
         }

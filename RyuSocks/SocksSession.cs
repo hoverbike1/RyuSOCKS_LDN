@@ -72,8 +72,25 @@ namespace RyuSocks
             return isDestinationValid;
         }
 
+        public int GetRequiredWrapperSpace()
+        {
+            int wrapperSpace = 0;
+
+            if (IsAuthenticated)
+            {
+                wrapperSpace = Auth.WrapperLength;
+            }
+
+            if (Command != null && wrapperSpace < Command.WrapperLength)
+            {
+                wrapperSpace = Command.WrapperLength;
+            }
+
+            return wrapperSpace;
+        }
+
         // TODO: Remove this once async Send/Receive for commands has been implemented.
-        public Span<byte> Unwrap(Span<byte> packet, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
             if (!IsConnected || IsClosing)
             {
@@ -81,26 +98,22 @@ namespace RyuSocks
             }
 
             remoteEndpoint = null;
-            int totalWrapperLength = 0;
+            int totalWrapperLength = packetLength;
 
             if (IsAuthenticated)
             {
-                packet = Auth.Unwrap(packet, out remoteEndpoint, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                totalWrapperLength = Auth.Unwrap(packet, packetLength, out remoteEndpoint);
             }
 
             if (Command != null)
             {
-                packet = Command.Unwrap(packet, out remoteEndpoint, out wrapperLength);
-                totalWrapperLength += wrapperLength;
+                totalWrapperLength = Command.Unwrap(packet, packetLength, out remoteEndpoint);
             }
 
-            wrapperLength = totalWrapperLength;
-
-            return packet;
+            return totalWrapperLength;
         }
 
-        protected virtual void ProcessAuthMethodSelection(Span<byte> buffer)
+        protected virtual void ProcessAuthMethodSelection(ReadOnlySpan<byte> buffer)
         {
             var request = new MethodSelectionRequest(buffer.ToArray());
             request.Validate();
@@ -130,10 +143,10 @@ namespace RyuSocks
             IsClosing = true;
         }
 
-        protected virtual void ProcessCommandRequest(Span<byte> buffer)
+        protected virtual void ProcessCommandRequest(Span<byte> buffer, int bufferLength)
         {
-            buffer = Unwrap(buffer, out _, out _);
-            var request = new CommandRequest(buffer.ToArray());
+            bufferLength = Unwrap(buffer, bufferLength, out _);
+            var request = new CommandRequest(buffer[..bufferLength].ToArray());
             request.Validate();
 
             var errorReply = new CommandResponse(new IPEndPoint(0, 0))
@@ -194,10 +207,20 @@ namespace RyuSocks
                 return;
             }
 
+            int bufferLength = bufferSpan.Length;
+            int requiredWrapperSpace = GetRequiredWrapperSpace();
+
+            if (requiredWrapperSpace != 0)
+            {
+                byte[] wrapperBuffer = new byte[bufferSpan.Length + requiredWrapperSpace];
+                bufferSpan.CopyTo(wrapperBuffer);
+                bufferSpan = wrapperBuffer;
+            }
+
             // Attempt to process a command request.
             if (Command == null)
             {
-                ProcessCommandRequest(bufferSpan);
+                ProcessCommandRequest(bufferSpan, bufferLength);
                 return;
             }
 
@@ -207,9 +230,9 @@ namespace RyuSocks
                 return;
             }
 
-            bufferSpan = Unwrap(bufferSpan, out _, out _);
+            bufferLength = Unwrap(bufferSpan, bufferLength, out _);
 
-            Command.OnReceived(bufferSpan);
+            Command.OnReceived(bufferSpan[..bufferLength]);
         }
 
         protected override void OnEmpty()
@@ -222,14 +245,26 @@ namespace RyuSocks
 
         public override bool SendAsync(ReadOnlySpan<byte> buffer)
         {
+            int bufferLength = buffer.Length;
+            int bufferSize = bufferLength + GetRequiredWrapperSpace();
+
+            byte[] sendBufferArray = buffer.ToArray();
+            Span<byte> sendBuffer = sendBufferArray;
+
+            if (bufferLength != bufferSize)
+            {
+                Array.Resize(ref sendBufferArray, bufferSize);
+                sendBuffer = sendBufferArray;
+            }
+
             if (Command != null)
             {
-                buffer = Command.Wrap(buffer, null, out _);
+                bufferLength = Command.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (IsAuthenticated)
             {
-                buffer = Auth.Wrap(buffer, null, out _);
+                bufferLength = Auth.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (Command is { UsesDatagrams: true })
@@ -242,19 +277,31 @@ namespace RyuSocks
                 throw new NotImplementedException("Async Send/Receive for commands has not been implemented yet.");
             }
 
-            return base.SendAsync(buffer);
+            return base.SendAsync(sendBuffer[..bufferLength]);
         }
 
         public override long Send(ReadOnlySpan<byte> buffer)
         {
+            int bufferLength = buffer.Length;
+            int bufferSize = bufferLength + GetRequiredWrapperSpace();
+
+            byte[] sendBufferArray = buffer.ToArray();
+            Span<byte> sendBuffer = sendBufferArray;
+
+            if (bufferLength != bufferSize)
+            {
+                Array.Resize(ref sendBufferArray, bufferSize);
+                sendBuffer = sendBufferArray;
+            }
+
             if (Command != null)
             {
-                buffer = Command.Wrap(buffer, null, out _);
+                bufferLength = Command.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (IsAuthenticated)
             {
-                buffer = Auth.Wrap(buffer, null, out _);
+                bufferLength = Auth.Wrap(sendBuffer, bufferLength, null);
             }
 
             if (Command is { UsesDatagrams: true })
@@ -264,10 +311,10 @@ namespace RyuSocks
 
             if (Command is { HandlesCommunication: true })
             {
-                return Command.Send(buffer);
+                return Command.Send(sendBuffer[..bufferLength]);
             }
 
-            return base.Send(buffer);
+            return base.Send(sendBuffer[..bufferLength]);
         }
 
         public int SendTo(ReadOnlySpan<byte> buffer, ProxyEndpoint endpoint)
@@ -282,15 +329,26 @@ namespace RyuSocks
                 throw new InvalidOperationException("The requested command is not able to send datagrams.");
             }
 
-            buffer = Command.Wrap(buffer, endpoint, out int totalWrapperLength);
+            int bufferLength = buffer.Length;
+            int bufferSize = bufferLength + GetRequiredWrapperSpace();
+
+            byte[] sendBufferArray = buffer.ToArray();
+            Span<byte> sendBuffer = sendBufferArray;
+
+            if (bufferLength != bufferSize)
+            {
+                Array.Resize(ref sendBufferArray, bufferSize);
+                sendBuffer = sendBufferArray;
+            }
+
+            bufferLength = Command.Wrap(sendBuffer, bufferLength, endpoint);
 
             if (IsAuthenticated)
             {
-                buffer = Auth.Wrap(buffer, endpoint, out int wrapperLength);
-                totalWrapperLength += wrapperLength;
+                bufferLength = Auth.Wrap(sendBuffer, bufferLength, endpoint);
             }
 
-            return Command.SendTo(buffer, endpoint.ToEndPoint()) - totalWrapperLength;
+            return Command.SendTo(sendBuffer[..bufferLength], endpoint.ToEndPoint());
         }
 
         public int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)

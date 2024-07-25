@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New method `Packet.IsValid()` which returns a bool instead of throwing exceptions. 
 - `Validate()` implementation for `EndPointPacket`.
 - `Socket.Close()` and `Socket.Dispose()` methods are exposed by `SocksClient` now.
-- Missing parameterless constructor for `CommandRequest`  
+- Missing parameterless constructor for `CommandRequest`.
 
 ### Changed
 
@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced init-only setter for `Packet.Bytes` with a regular setter.
 - Replaced protected fields of `SocksSession` with public properties
   containing a protected setter.
+- Changed the signature for `Wrap()` and `Unwrap()`.
 
 ### Fixed
 

@@ -8,6 +8,7 @@ namespace RyuSocks.Commands
     {
         public abstract bool HandlesCommunication { get; }
         public abstract bool UsesDatagrams { get; }
+        public virtual int WrapperLength => 0;
 
         protected readonly ProxyEndpoint ProxyEndpoint;
 
@@ -16,17 +17,15 @@ namespace RyuSocks.Commands
             ProxyEndpoint = proxyEndpoint;
         }
 
-        public virtual ReadOnlySpan<byte> Wrap(ReadOnlySpan<byte> packet, ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public virtual int Wrap(Span<byte> packet, int packetLength, ProxyEndpoint remoteEndpoint)
         {
-            wrapperLength = 0;
-            return packet;
+            return 0;
         }
 
-        public virtual Span<byte> Unwrap(Span<byte> packet, out ProxyEndpoint remoteEndpoint, out int wrapperLength)
+        public virtual int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
-            wrapperLength = 0;
             remoteEndpoint = ProxyEndpoint;
-            return packet;
+            return 0;
         }
 
         public virtual int Send(ReadOnlySpan<byte> buffer)
