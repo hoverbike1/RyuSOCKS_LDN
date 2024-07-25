@@ -62,5 +62,6 @@ namespace RyuSocks.Packets
         public CommandRequest(IPEndPoint endpoint) : base(endpoint) { }
         public CommandRequest(DnsEndPoint endpoint) : base(endpoint) { }
         public CommandRequest(ProxyEndpoint endpoint) : base(endpoint) { }
+        public CommandRequest() { }
     }
 }
