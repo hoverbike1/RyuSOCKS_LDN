@@ -91,5 +91,27 @@ namespace RyuSocks.Test.Packets
 
             response.Validate();
         }
+
+        [Theory]
+        // 0 bytes
+        [InlineData(new byte[] { }, false)]
+        // 1 byte
+        [InlineData(new byte[] { ProxyConsts.Version }, false)]
+        // 2 bytes
+        [InlineData(new byte[] { ProxyConsts.Version, 0x0 }, true)]
+        // 3 bytes
+        [InlineData(new byte[] { ProxyConsts.Version, 0x0, 0x0 }, false)]
+        public void Validate_ThrowsOnInvalidLength(byte[] packetBytes, bool isValidInput)
+        {
+            MethodSelectionResponse response = new(packetBytes);
+
+            if (!isValidInput)
+            {
+                Assert.ThrowsAny<Exception>(() => response.Validate());
+                return;
+            }
+
+            response.Validate();
+        }
     }
 }
