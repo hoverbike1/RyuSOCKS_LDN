@@ -28,10 +28,8 @@ using Xunit;
 
 namespace RyuSocks.Test.Packets
 {
-    public class CommandRequestTests
+    public class CommandRequestTests : CommandPacketTests<CommandRequest>
     {
-        private const string VeryLongInvalidTestDomainName = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc.local";
-
 #pragma warning disable IDE0055 // Disable formatting
         public static readonly TheoryData<byte, ProxyCommand, byte, string, ushort> DnsEndPointData = new()
         {
@@ -52,6 +50,8 @@ namespace RyuSocks.Test.Packets
             { ProxyConsts.Version, (ProxyCommand)byte.MaxValue, 0x07,    "2001:db8::ffff:0001",         2, false },
         };
 #pragma warning restore IDE0055
+
+        public CommandRequestTests() : base(packetBytes => new CommandRequest(packetBytes)) { }
 
         [Theory]
         [StringData(byte.MinValue + 1, byte.MaxValue, 4)]
@@ -218,100 +218,6 @@ namespace RyuSocks.Test.Packets
             Assert.Equal(reserved, request.Reserved);
             Assert.Equal(address, request.DestinationAddress);
             Assert.Equal(port, request.DestinationPort);
-        }
-
-        [Theory]
-        [InlineData(0x0, ProxyCommand.Connect, 0x00, AddressType.DomainName, "test.local", 1042, false)]
-        [InlineData(0x1, ProxyCommand.Connect, 0x00, AddressType.DomainName, "test.local", 1242, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.UdpAssociate, 0x2F, AddressType.DomainName, "test.local", 42, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.UdpAssociate, 0x00, AddressType.Ipv6Address, "test.local", 66, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, (AddressType)0xFF, "test.local", 21, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, AddressType.DomainName, "", 1222, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, AddressType.DomainName, VeryLongInvalidTestDomainName, 1111, false)]
-        [InlineData(ProxyConsts.Version, (ProxyCommand)0xFF, 0x00, AddressType.DomainName, "test.local", 0, true)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Connect, 0x00, AddressType.DomainName, "test.local", 1042, true)]
-        public void Validate_ThrowsOnInvalidValue_DomainName(byte version, ProxyCommand command, byte reserved, AddressType addressType, string domainName, ushort port, bool isValidInput)
-        {
-            // Construct the packet manually to skip the checks in the constructor
-            byte[] packetBytes = [
-                // Version
-                version,
-                // Command
-                (byte)command,
-                // Reserved
-                reserved,
-                // Address type
-                (byte)addressType,
-                // Address
-                // Port
-            ];
-            Array.Resize(ref packetBytes, packetBytes.Length + 1 + (domainName.Length > 0 ? domainName.Length : 1) + 2);
-            // Address
-            packetBytes[4] = (byte)Encoding.ASCII.GetByteCount(domainName);
-            Encoding.ASCII.GetBytes(domainName).CopyTo(packetBytes.AsSpan(5));
-            // Port
-            BitConverter.GetBytes(port).Reverse().ToArray().CopyTo(packetBytes.AsSpan(packetBytes.Length - 2));
-
-            CommandRequest request = new(packetBytes);
-
-            if (!isValidInput)
-            {
-                Assert.ThrowsAny<Exception>(() => request.Validate());
-                return;
-            }
-
-            request.Validate();
-        }
-
-        [Theory]
-        [InlineData(0, ProxyCommand.Connect, 0x00, AddressType.Ipv6Address, "2001:db8::aaaa:c0c0:4444", 1042, false, false)]
-        [InlineData(0, ProxyCommand.Connect, 0x00, AddressType.Ipv4Address, "10.0.0.122", 1242, true, false)]
-        [InlineData(1, ProxyCommand.Connect, 0x00, AddressType.Ipv6Address, "2001:db8::aaaa:c0c0:4444", 1042, false, false)]
-        [InlineData(0xAF, ProxyCommand.Connect, 0x00, AddressType.Ipv4Address, "10.0.0.122", 1242, true, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.UdpAssociate, 0x7F, AddressType.Ipv6Address, "2001:db8::aaaa:c0c0:4444", 1042, false, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.UdpAssociate, 0xAA, AddressType.Ipv4Address, "10.0.0.122", 1242, true, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, AddressType.DomainName, "2001:db8::aaaa:c0c0:4444", 1042, false, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, AddressType.DomainName, "10.0.0.122", 1242, true, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, (AddressType)0xFF, "2001:db8::aaaa:c0c0:4444", 1042, false, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Bind, 0x00, (AddressType)0xFF, "10.0.0.122", 1242, true, false)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Connect, 0x00, AddressType.Ipv6Address, "2001:db8::aaaa:c0c0:4444", 0, false, true)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Connect, 0x00, AddressType.Ipv4Address, "10.0.0.122", 0, true, true)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Connect, 0x00, AddressType.Ipv6Address, "2001:db8::ffff:0001", 2, false, true)]
-        [InlineData(ProxyConsts.Version, ProxyCommand.Connect, 0x00, AddressType.Ipv4Address, "0.0.0.0", 1042, true, true)]
-        [InlineData(ProxyConsts.Version, (ProxyCommand)0xFF, 0x00, AddressType.Ipv6Address, "2001:db8::aaaa:c0c0:4444", 2222, false, true)]
-        [InlineData(ProxyConsts.Version, (ProxyCommand)0xFF, 0x00, AddressType.Ipv4Address, "10.0.0.122", 1111, true, true)]
-        public void Validate_ThrowsOnInvalidValue_IPAddress(byte version, ProxyCommand command, byte reserved, AddressType addressType, string ipAddress, ushort port, bool isIpv4, bool isValidInput)
-        {
-            // Construct the packet manually to skip the checks in the constructor
-            IPAddress address = IPAddress.Parse(ipAddress);
-            byte[] packetBytes = [
-                // Version
-                version,
-                // Command
-                (byte)command,
-                // Reserved
-                reserved,
-                // Address type
-                (byte)addressType,
-                // Address
-                // Port
-            ];
-            Array.Resize(ref packetBytes, packetBytes.Length + (isIpv4 ? 4 : 16) + 2);
-            // Address
-            bool addressWritten = address.TryWriteBytes(packetBytes.AsSpan(4), out _);
-            Assert.True(addressWritten);
-            // Port
-            BitConverter.GetBytes(port).Reverse().ToArray().CopyTo(packetBytes.AsSpan(packetBytes.Length - 2));
-
-            CommandRequest request = new(packetBytes);
-
-            if (!isValidInput)
-            {
-                Assert.ThrowsAny<Exception>(() => request.Validate());
-                return;
-            }
-
-            request.Validate();
         }
     }
 }
