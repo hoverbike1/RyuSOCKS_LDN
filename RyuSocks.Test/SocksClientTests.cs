@@ -68,6 +68,7 @@ namespace RyuSocks.Test
 
         public SocksServerFixture()
         {
+#pragma warning disable IDE0028 // Collection initialization can be simplified
             Server = new TestSocksServer(IPAddress.Loopback, 0)
             {
                 AcceptableAuthMethods = new HashSet<AuthMethod>
@@ -81,6 +82,7 @@ namespace RyuSocks.Test
                     ProxyCommand.UdpAssociate,
                 },
             };
+#pragma warning restore IDE0028
 
             Server.Start();
         }
