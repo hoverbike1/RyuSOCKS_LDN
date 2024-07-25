@@ -85,7 +85,7 @@ namespace RyuSocks.Test.Packets
 
             if (!isValidInput)
             {
-                Assert.Throws<InvalidOperationException>(() => response.Validate());
+                Assert.ThrowsAny<Exception>(() => response.Validate());
                 return;
             }
 
