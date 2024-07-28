@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <Version>0.1.0-alpha</Version>
+        <Version>0.2.0-alpha</Version>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <IsAotCompatible>true</IsAotCompatible>
         <PublishAot>true</PublishAot>
@@ -19,7 +19,47 @@
         <Authors>TSRBerry</Authors>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
-        <PackageReleaseNotes>The changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md</PackageReleaseNotes>
+        <PackageReleaseNotes>
+            The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
+
+            ---
+
+            ### Added
+
+            - Logo made by [Justin de Haas](https://onemuri.nl/).
+            - Basic SOCKS5 proxy client (not compliant yet).
+            - New generated `IProxyAuth.GetAuth()` extension method
+            to get the `AuthMethod` value from an auth implementation.
+            - `Packet` constructor which takes a byte array.
+            - New method `Packet.AsSpan()` to get the underlying byte array of a packet
+            as a `Span{byte}`.
+            - Constructors taking a `ProxyEndpoint` for `EndpointPackets`.
+            - `Equals()` and `GetHashCode()` implementation for `ProxyEndpoint`.
+            - New interface `IWrapper` which contains `Wrap()` and `Unwrap()`.
+            - New properties for `Command` implementations to control communication
+            with the proxy server.
+            - New method `Packet.IsValid()` which returns a bool instead of throwing exceptions.
+            - `Validate()` implementation for `EndPointPacket`.
+            - `Socket.Close()` and `Socket.Dispose()` methods are exposed by `SocksClient` now.
+            - Missing parameterless constructor for `CommandRequest`.
+
+            ### Changed
+
+            - Improved introduction in `README.md`.
+            - Renamed `Destination` class to `ProxyEndpoint`.
+            - `SocksSession.Process*()` methods were marked as virtual.
+            - Improved exception messages.
+            - Throw `ArgumentOutOfRangeException` instead of `ArgumentException`
+            if the length of the domain name is invalid for `EndpointPackets`.
+            - Replaced init-only setter for `Packet.Bytes` with a regular setter.
+            - Replaced protected fields of `SocksSession` with public properties
+            containing a protected setter.
+            - Changed the signature for `Wrap()` and `Unwrap()`.
+
+            ### Fixed
+
+            - Misbehaving UdpAssociate command.
+        </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
