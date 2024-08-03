@@ -103,22 +103,24 @@ namespace RyuSocks.Commands.Client
             throw new InvalidOperationException($"Unexpected invocation of {nameof(ProcessResponse)}. {nameof(ServerEndpoint)} is already assigned.");
         }
 
-        public override int ReceiveFrom(Span<byte> buffer, ref EndPoint endpoint)
+        public override int ReceiveFrom(Span<byte> buffer, SocketFlags socketFlags, ref EndPoint remoteEP)
         {
             int receivedBytes = 0;
 
             // Discard packets from unexpected endpoints
-            while (ServerEndpoint.ToEndPoint() != endpoint)
+            while (ServerEndpoint.ToEndPoint() != remoteEP)
             {
-                receivedBytes = _socket.ReceiveFrom(buffer, ref endpoint);
+                receivedBytes = _socket.ReceiveFrom(buffer, socketFlags, ref remoteEP);
             }
 
             return receivedBytes;
         }
 
-        public override int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)
+        public override int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
-            return _socket.SendTo(buffer, ServerEndpoint.ToEndPoint());
+            // NOTE: remoteEP is set during Wrap() and gets ignored here,
+            //       since the packet needs to be sent to the proxy server.
+            return _socket.SendTo(buffer, socketFlags, ServerEndpoint.ToEndPoint());
         }
     }
 }

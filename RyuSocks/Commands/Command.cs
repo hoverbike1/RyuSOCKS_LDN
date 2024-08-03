@@ -1,6 +1,7 @@
 using RyuSocks.Types;
 using System;
 using System.Net;
+using System.Net.Sockets;
 
 namespace RyuSocks.Commands
 {
@@ -28,22 +29,22 @@ namespace RyuSocks.Commands
             return 0;
         }
 
-        public virtual int Send(ReadOnlySpan<byte> buffer)
+        public virtual int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
 
-        public virtual int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)
+        public virtual int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
             throw new NotSupportedException("This command does not use datagrams, so this method must not be called.");
         }
 
-        public virtual int Receive(Span<byte> buffer)
+        public virtual int Receive(Span<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
 
-        public virtual int ReceiveFrom(Span<byte> buffer, ref EndPoint endpoint)
+        public virtual int ReceiveFrom(Span<byte> buffer, SocketFlags socketFlags, ref EndPoint remoteEP)
         {
             throw new NotSupportedException("This command does not use datagrams, so this method must not be called.");
         }

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which implement `IDisposable`.
 - `UdpAssociateCommand.WrapperLength` now correctly returns the maximum amount 
   of bytes required to wrap/unwrap a `UdpPacket`.
+- The send and receive methods of commands hava parameters for
+  `SocketFlags` and `SocketError` now.
 
 ## [0.2.0-alpha] - 2024-07-28
 

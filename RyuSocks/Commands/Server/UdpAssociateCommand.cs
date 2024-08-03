@@ -18,6 +18,7 @@ using RyuSocks.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 
 namespace RyuSocks.Commands.Server
 {
@@ -78,9 +79,10 @@ namespace RyuSocks.Commands.Server
             return packet.Bytes.Length;
         }
 
-        public override int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)
+        public override int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
-            return (int)_server.Send(endpoint, buffer);
+            // TODO: Use socketFlags
+            return (int)_server.Send(remoteEP, buffer);
         }
 
         public override void OnReceived(ReadOnlySpan<byte> buffer)

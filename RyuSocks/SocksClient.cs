@@ -376,8 +376,7 @@ namespace RyuSocks
 
             if (Command is { Ready: true, HandlesCommunication: true })
             {
-                errorCode = SocketError.Success;
-                return Command.Send(sendBuffer[..bufferLength]);
+                return Command.Send(sendBuffer[..bufferLength], socketFlags, out errorCode);
             }
 
             return _socket.Send(sendBuffer[..bufferLength], socketFlags, out errorCode);
@@ -397,13 +396,16 @@ namespace RyuSocks
 
             if (Command is { Ready: true, HandlesCommunication: true })
             {
-                // TODO: Fix the signature of Send/Receive methods for commands
-                bytesReceived = Command.Receive(buffer);
-                errorCode = SocketError.Success;
+                bytesReceived = Command.Receive(buffer, socketFlags, out errorCode);
             }
             else
             {
                 bytesReceived = _socket.Receive(buffer, socketFlags, out errorCode);
+            }
+
+            if (errorCode != SocketError.Success)
+            {
+                return bytesReceived;
             }
 
             if (Authenticated)
@@ -459,7 +461,7 @@ namespace RyuSocks
 
             if (Command is { Ready: true })
             {
-                return Command.SendTo(sendBuffer[..bufferLength], remoteEP);
+                return Command.SendTo(sendBuffer[..bufferLength], socketFlags, remoteEP);
             }
 
             return _socket.SendTo(sendBuffer[..bufferLength], socketFlags, remoteEP);
@@ -474,8 +476,7 @@ namespace RyuSocks
                 throw new InvalidOperationException($"{nameof(ReceiveFrom)} can only be used when receiving datagrams.");
             }
 
-            // TODO: Fix the signature of SendTo/ReceiveTo methods for commands
-            int bytesReceived = Command.ReceiveFrom(buffer, ref remoteEP);
+            int bytesReceived = Command.ReceiveFrom(buffer, socketFlags, ref remoteEP);
 
             if (Authenticated)
             {

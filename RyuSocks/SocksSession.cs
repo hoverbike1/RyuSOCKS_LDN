@@ -25,6 +25,7 @@ using RyuSocks.Utils;
 using System;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Authentication;
 
 namespace RyuSocks
@@ -311,7 +312,14 @@ namespace RyuSocks
 
             if (Command is { HandlesCommunication: true })
             {
-                return Command.Send(sendBuffer[..bufferLength]);
+                long sentSize = Command.Send(sendBuffer[..bufferLength], SocketFlags.None, out SocketError errorCode);
+
+                if (errorCode != SocketError.Success)
+                {
+                    throw new SocketException((int)errorCode);
+                }
+
+                return sentSize;
             }
 
             return base.Send(sendBuffer[..bufferLength]);
@@ -348,7 +356,7 @@ namespace RyuSocks
                 bufferLength = Auth.Wrap(sendBuffer, bufferLength, endpoint);
             }
 
-            return Command.SendTo(sendBuffer[..bufferLength], endpoint.ToEndPoint());
+            return Command.SendTo(sendBuffer[..bufferLength], SocketFlags.None, endpoint.ToEndPoint());
         }
 
         public int SendTo(ReadOnlySpan<byte> buffer, EndPoint endpoint)
