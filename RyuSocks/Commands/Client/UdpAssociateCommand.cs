@@ -22,7 +22,7 @@ using System.Net.Sockets;
 namespace RyuSocks.Commands.Client
 {
     [ProxyCommandImpl(0x03)]
-    public partial class UdpAssociateCommand : ClientCommand
+    public partial class UdpAssociateCommand : ClientCommand, IDisposable
     {
         private readonly Socket _socket;
         public override bool HandlesCommunication => true;
@@ -56,6 +56,12 @@ namespace RyuSocks.Commands.Client
 
             request.Validate();
             Client.Send(request.AsSpan());
+        }
+
+        public void Dispose()
+        {
+            _socket.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public override int Wrap(Span<byte> buffer, int packetLength, ProxyEndpoint remoteEndpoint)
