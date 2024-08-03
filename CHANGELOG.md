@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `SocksClient.Connect()` implementation which takes an `IPEndPoint`.
+- `Socket.Disconnect()` method is exposed by `SocksClient` and commands now.
 
 ### Fixed
 

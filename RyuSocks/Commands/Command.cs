@@ -29,6 +29,11 @@ namespace RyuSocks.Commands
             return 0;
         }
 
+        public virtual void Disconnect()
+        {
+            throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
+        }
+
         public virtual int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");

@@ -345,6 +345,17 @@ namespace RyuSocks
             }
         }
 
+        public void Disconnect()
+        {
+            if (Command is { HandlesCommunication: true })
+            {
+                Command.Disconnect();
+            }
+
+            // TODO: Set reuseSocket to true once we can handle reconnects here
+            _socket.Disconnect(false);
+        }
+
         public int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
             if (Command is { UsesDatagrams: true })

@@ -103,6 +103,11 @@ namespace RyuSocks.Commands.Client
             throw new InvalidOperationException($"Unexpected invocation of {nameof(ProcessResponse)}. {nameof(ServerEndpoint)} is already assigned.");
         }
 
+        public override void Disconnect()
+        {
+            _socket.Disconnect(false);
+        }
+
         public override int ReceiveFrom(Span<byte> buffer, SocketFlags socketFlags, ref EndPoint remoteEP)
         {
             int receivedBytes = 0;
