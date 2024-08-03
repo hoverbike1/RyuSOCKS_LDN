@@ -276,7 +276,7 @@ namespace RyuSocks
             }
         }
 
-        public void Connect(IPAddress address, int port)
+        public void Connect(IPEndPoint remoteEP)
         {
             if (!Authenticated)
             {
@@ -289,7 +289,7 @@ namespace RyuSocks
             }
 
             // Create the proxy command. This sends the CommandRequest to the server.
-            Command = RequestCommand.GetClientCommand()(this, new ProxyEndpoint(new IPEndPoint(address, port)));
+            Command = RequestCommand.GetClientCommand()(this, new ProxyEndpoint(remoteEP));
 
             // Process command responses until the connection is ready to be used for data or an exception is thrown.
             CommandResponse response = new();
@@ -306,6 +306,8 @@ namespace RyuSocks
                 ProcessCommandResponse(response);
             }
         }
+
+        public void Connect(IPAddress address, int port) => Connect(new IPEndPoint(address, port));
 
         public void Connect(string host, int port)
         {

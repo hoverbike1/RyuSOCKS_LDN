@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `SocksClient.Connect()` implementation which takes an `IPEndPoint`.
+
 ## [0.2.0-alpha] - 2024-07-28
 
 ### Added
