@@ -47,11 +47,11 @@ namespace RyuSocks.Test.Auth
             int packetLength = packet.Length;
             NoAuth noAuth = new();
 
-            int wrappedPacketLength = noAuth.Unwrap(packet, packetLength, out ProxyEndpoint remoteEndpoint);
+            int unwrappedPacketLength = noAuth.Unwrap(packet, packetLength, out ProxyEndpoint remoteEndpoint);
 
             Assert.Equal(0, noAuth.WrapperLength);
             Assert.Null(remoteEndpoint);
-            Assert.Equal(packetLength, wrappedPacketLength);
+            Assert.Equal(packetLength, unwrappedPacketLength);
             Assert.Equal(originalPacket, packet);
         }
 
