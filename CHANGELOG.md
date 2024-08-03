@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `SocksClient.Connect()` implementation which takes an `IPEndPoint`.
 
+### Fixed
+
+- `SocksClient.Dispose()` now also calls `Dispose()` for commands
+  which implement `IDisposable`.
+
 ## [0.2.0-alpha] - 2024-07-28
 
 ### Added

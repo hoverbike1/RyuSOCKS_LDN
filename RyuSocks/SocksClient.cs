@@ -78,6 +78,11 @@ namespace RyuSocks
         /// <inheritdoc cref="Socket.Dispose"/>
         public void Dispose()
         {
+            if (Command is IDisposable disposableCommand)
+            {
+                disposableCommand.Dispose();
+            }
+
             _socket.Dispose();
             GC.SuppressFinalize(this);
         }
