@@ -26,6 +26,10 @@ namespace RyuSocks.Commands.Server
     {
         public override bool HandlesCommunication => true;
         public override bool UsesDatagrams => true;
+        // TODO: Improve WrapperLength value.
+        //       This is currently set to the maximum length of an EndpointPacket,
+        //       but we usually don't need that much space.
+        public override int WrapperLength => 262;
         private UdpServer _server;
 
         public UdpAssociateCommand(SocksSession session, IPEndPoint boundEndpoint, ProxyEndpoint source) : base(session, boundEndpoint, source)
