@@ -67,7 +67,7 @@ namespace RyuSocks.Test
             int currentTry = 1;
             SocksSession session = _fixture.Server.GetSession(sessionId);
 
-            while (currentTry <= MaxTries && !session.IsAuthenticated)
+            while (currentTry <= MaxTries && !session.Authenticated)
             {
                 Thread.Sleep(SleepSeconds * 1000);
                 currentTry++;
@@ -75,7 +75,7 @@ namespace RyuSocks.Test
 
             // END: Temp workaround
 
-            Assert.True(_fixture.Server.GetSession(sessionId).IsAuthenticated);
+            Assert.True(_fixture.Server.GetSession(sessionId).Authenticated);
         }
     }
 

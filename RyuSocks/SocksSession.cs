@@ -32,8 +32,8 @@ namespace RyuSocks
 {
     public partial class SocksSession : TcpSession
     {
-        public bool IsClosing { get; protected set; }
-        public bool IsAuthenticated { get; protected set; }
+        public bool Closing { get; protected set; }
+        public bool Authenticated { get; protected set; }
         public IProxyAuth Auth { get; protected set; }
         public ServerCommand Command { get; protected set; }
 
@@ -77,7 +77,7 @@ namespace RyuSocks
         {
             int wrapperSpace = 0;
 
-            if (IsAuthenticated)
+            if (Authenticated)
             {
                 wrapperSpace = Auth.WrapperLength;
             }
@@ -93,7 +93,7 @@ namespace RyuSocks
         // TODO: Remove this once async Send/Receive for commands has been implemented.
         public int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
-            if (!IsConnected || IsClosing)
+            if (!IsConnected || Closing)
             {
                 throw new InvalidOperationException("Session is not connected or closing soon.");
             }
@@ -101,7 +101,7 @@ namespace RyuSocks
             remoteEndpoint = null;
             int totalWrapperLength = packetLength;
 
-            if (IsAuthenticated)
+            if (Authenticated)
             {
                 totalWrapperLength = Auth.Unwrap(packet, packetLength, out remoteEndpoint);
             }
@@ -141,7 +141,7 @@ namespace RyuSocks
             };
 
             SendAsync(errorReply.AsSpan());
-            IsClosing = true;
+            Closing = true;
         }
 
         protected virtual void ProcessCommandRequest(Span<byte> buffer, int bufferLength)
@@ -167,14 +167,14 @@ namespace RyuSocks
 
                 errorReply.ReplyField = ReplyField.ConnectionNotAllowed;
                 SendAsync(errorReply.AsSpan());
-                IsClosing = true;
+                Closing = true;
 
                 return;
             }
 
             errorReply.ReplyField = ReplyField.CommandNotSupported;
             SendAsync(errorReply.AsSpan());
-            IsClosing = true;
+            Closing = true;
         }
 
         protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -186,23 +186,23 @@ namespace RyuSocks
             {
                 ProcessAuthMethodSelection(bufferSpan);
                 // TODO: We should avoid having special cases. Is this fine?
-                IsAuthenticated = Auth.GetAuth() == AuthMethod.NoAuth;
+                Authenticated = Auth.GetAuth() == AuthMethod.NoAuth;
 
                 return;
             }
 
             // Authenticate the client.
-            if (!IsAuthenticated)
+            if (!Authenticated)
             {
                 try
                 {
-                    IsAuthenticated = Auth.Authenticate(bufferSpan, out ReadOnlySpan<byte> sendBuffer);
+                    Authenticated = Auth.Authenticate(bufferSpan, out ReadOnlySpan<byte> sendBuffer);
                     SendAsync(sendBuffer);
                 }
                 catch (AuthenticationException)
                 {
                     // TODO: Log the exception here.
-                    IsClosing = true;
+                    Closing = true;
                 }
 
                 return;
@@ -226,7 +226,7 @@ namespace RyuSocks
             }
 
             // Don't process packets for clients we are disconnecting soon.
-            if (IsClosing)
+            if (Closing)
             {
                 return;
             }
@@ -238,7 +238,7 @@ namespace RyuSocks
 
         protected override void OnEmpty()
         {
-            if (IsClosing)
+            if (Closing)
             {
                 Disconnect();
             }
@@ -263,7 +263,7 @@ namespace RyuSocks
                 bufferLength = Command.Wrap(sendBuffer, bufferLength, null);
             }
 
-            if (IsAuthenticated)
+            if (Authenticated)
             {
                 bufferLength = Auth.Wrap(sendBuffer, bufferLength, null);
             }
@@ -300,7 +300,7 @@ namespace RyuSocks
                 bufferLength = Command.Wrap(sendBuffer, bufferLength, null);
             }
 
-            if (IsAuthenticated)
+            if (Authenticated)
             {
                 bufferLength = Auth.Wrap(sendBuffer, bufferLength, null);
             }
@@ -351,7 +351,7 @@ namespace RyuSocks
 
             bufferLength = Command.Wrap(sendBuffer, bufferLength, endpoint);
 
-            if (IsAuthenticated)
+            if (Authenticated)
             {
                 bufferLength = Auth.Wrap(sendBuffer, bufferLength, endpoint);
             }

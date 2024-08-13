@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Username and password authentication method
   according to [RFC 1929](https://datatracker.ietf.org/doc/html/rfc1929) ([#16]).
 
+### Changed
+
+- Remove `Is`-prefix from `SocksSession` properties.
+
 ### Fixed
 
 - `SocksClient.Dispose()` now also calls `Dispose()` for commands
