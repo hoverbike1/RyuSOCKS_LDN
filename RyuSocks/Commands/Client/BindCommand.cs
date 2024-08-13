@@ -26,9 +26,9 @@ namespace RyuSocks.Commands.Client
         public override bool UsesDatagrams => false;
         public ProxyEndpoint ClientEndpoint { get; private set; }
 
-        public BindCommand(SocksClient client, ProxyEndpoint proxyEndpoint) : base(client, proxyEndpoint)
+        public BindCommand(SocksClient client, ProxyEndpoint source) : base(client, source)
         {
-            CommandRequest request = new(proxyEndpoint)
+            CommandRequest request = new(source)
             {
                 Version = ProxyConsts.Version,
                 Command = ProxyCommand.Bind,

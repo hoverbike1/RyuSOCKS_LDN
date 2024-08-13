@@ -51,7 +51,7 @@ namespace RyuSocks.Commands.Client
                     Command = ProxyCommand.UdpAssociate,
                 },
                 _ => throw new InvalidOperationException(
-                    $"The type of LocalEndPoint is not supported: {_socket.LocalEndPoint}"),
+                    $"The type of {nameof(_socket.LocalEndPoint)} is not supported: {_socket.LocalEndPoint}"),
             };
 
             request.Validate();
@@ -92,6 +92,7 @@ namespace RyuSocks.Commands.Client
         {
             EnsureSuccessReply(response.ReplyField);
 
+            // Server endpoint used to handle UDP requests from this client.
             if (ServerEndpoint == null)
             {
                 ServerEndpoint = response.ProxyEndpoint;

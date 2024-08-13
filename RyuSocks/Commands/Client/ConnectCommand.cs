@@ -43,6 +43,7 @@ namespace RyuSocks.Commands.Client
         {
             EnsureSuccessReply(response.ReplyField);
 
+            // Server endpoint used to connect to the destination.
             if (ServerEndpoint == null)
             {
                 ServerEndpoint = response.ProxyEndpoint;

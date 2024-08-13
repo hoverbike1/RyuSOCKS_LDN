@@ -10,6 +10,10 @@ namespace RyuSocks.Commands
         protected readonly SocksClient Client;
         public bool Accepted { get; protected set; }
         public bool Ready { get; protected set; }
+
+        /// <summary>
+        /// The endpoint used by the proxy server for this command.
+        /// </summary>
         public ProxyEndpoint ServerEndpoint { get; protected set; }
 
         protected ClientCommand(SocksClient client, ProxyEndpoint proxyEndpoint) : base(proxyEndpoint)
