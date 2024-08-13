@@ -23,6 +23,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using Xunit;
 
 namespace RyuSocks.Test
@@ -57,6 +58,23 @@ namespace RyuSocks.Test
             Guid sessionId = _fixture.Server.Sessions.Keys.First();
 
             Assert.Equal(1, _fixture.Server.ConnectedSessions);
+
+            // FIXME: Race condition here. We are (currently) getting packets asynchronously.
+
+            // Temp workaround: To be removed after the NetCoreServer dependency was removed as well.
+            const int MaxTries = 10;
+            const int SleepSeconds = 1;
+            int currentTry = 1;
+            SocksSession session = _fixture.Server.GetSession(sessionId);
+
+            while (currentTry <= MaxTries && !session.IsAuthenticated)
+            {
+                Thread.Sleep(SleepSeconds * 1000);
+                currentTry++;
+            }
+
+            // END: Temp workaround
+
             Assert.True(_fixture.Server.GetSession(sessionId).IsAuthenticated);
         }
     }
