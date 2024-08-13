@@ -109,6 +109,16 @@ namespace RyuSocks.Commands.Client
             _socket.Disconnect(false);
         }
 
+        public override void GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _socket.GetSocketOption(optionLevel, optionName, optionValue);
+        }
+
+        public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _socket.SetSocketOption(optionLevel, optionName, optionValue);
+        }
+
         public override int ReceiveFrom(Span<byte> buffer, SocketFlags socketFlags, ref EndPoint remoteEP)
         {
             int receivedBytes = 0;

@@ -197,6 +197,28 @@ namespace RyuSocks
             }
         }
 
+        public void GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            if (Command is { HandlesCommunication: true })
+            {
+                Command.GetSocketOption(optionLevel, optionName, optionValue);
+                return;
+            }
+
+            _socket.GetSocketOption(optionLevel, optionName, optionValue);
+        }
+
+        public void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            if (Command is { HandlesCommunication: true })
+            {
+                Command.SetSocketOption(optionLevel, optionName, optionValue);
+                return;
+            }
+
+            _socket.SetSocketOption(optionLevel, optionName, optionValue);
+        }
+
         public SocksClient Accept()
         {
             if (!Authenticated)

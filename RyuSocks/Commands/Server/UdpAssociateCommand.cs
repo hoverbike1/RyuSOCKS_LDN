@@ -79,6 +79,16 @@ namespace RyuSocks.Commands.Server
             return packet.Bytes.Length;
         }
 
+        public override void GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _server.Socket.GetSocketOption(optionLevel, optionName, optionValue);
+        }
+
+        public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _server.Socket.SetSocketOption(optionLevel, optionName, optionValue);
+        }
+
         public override int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
             // TODO: Use socketFlags

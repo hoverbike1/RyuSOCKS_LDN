@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   all remote client endpoints received from a proxy server.
 - New `EndPoint` properties for `SocksClient`:
   `LocalEndPoint`, `ProxiedLocalEndPoint` and `ProxiedRemoteEndPoint`.
+- Minimal implementation of `GetSocketOption()` and `SetSocketOption()`
+  for `SocksClient` and `Command` (in case it handles communication).
 
 ### Changed
 
