@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   according to [RFC 1929](https://datatracker.ietf.org/doc/html/rfc1929) ([#16]).
 - New list property (`ClientCommand.ClientEndpoints`) which contains
   all remote client endpoints received from a proxy server.
+- New `EndPoint` properties for `SocksClient`:
+  `LocalEndPoint`, `ProxiedLocalEndPoint` and `ProxiedRemoteEndPoint`.
 
 ### Changed
 

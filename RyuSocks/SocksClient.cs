@@ -45,6 +45,9 @@ namespace RyuSocks
         public event EventHandler<ProxyEndpoint> OnServerEndpointReceived;
         public IReadOnlyDictionary<AuthMethod, IProxyAuth> OfferedAuthMethods { get; init; } = new Dictionary<AuthMethod, IProxyAuth>();
 
+        public EndPoint LocalEndPoint => _socket.LocalEndPoint;
+        public EndPoint ProxiedLocalEndPoint => Command?.ServerEndpoint.ToEndPoint();
+        public EndPoint ProxiedRemoteEndPoint => Command?.ClientEndpoints.Count > 0 ? Command.ClientEndpoints[0].ToEndPoint() : null;
         public AddressFamily AddressFamily => _proxyEndpoint.ToEndPoint().AddressFamily;
         public SocketType SocketType => Command is { UsesDatagrams: true } ? SocketType.Dgram : SocketType.Stream;
         public ProtocolType ProtocolType => Command is { UsesDatagrams: true } ? ProtocolType.Udp : ProtocolType.Tcp;
