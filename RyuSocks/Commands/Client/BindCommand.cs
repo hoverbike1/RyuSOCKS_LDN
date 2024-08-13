@@ -24,7 +24,6 @@ namespace RyuSocks.Commands.Client
     {
         public override bool HandlesCommunication => false;
         public override bool UsesDatagrams => false;
-        public ProxyEndpoint ClientEndpoint { get; private set; }
 
         public BindCommand(SocksClient client, ProxyEndpoint source) : base(client, source)
         {
@@ -51,14 +50,14 @@ namespace RyuSocks.Commands.Client
             }
 
             // Anticipated incoming connection.
-            if (ClientEndpoint == null)
+            if (RemoteClients.Count == 0)
             {
-                ClientEndpoint = response.ProxyEndpoint;
+                RemoteClients.Add(response.ProxyEndpoint);
                 Ready = true;
                 return;
             }
 
-            throw new InvalidOperationException($"Unexpected invocation of {nameof(ProcessResponse)}. {nameof(ServerEndpoint)} and {nameof(ClientEndpoint)} are already assigned.");
+            throw new InvalidOperationException($"Unexpected invocation of {nameof(ProcessResponse)}. {nameof(ServerEndpoint)} and {nameof(ClientEndpoints)} are already assigned.");
         }
     }
 }

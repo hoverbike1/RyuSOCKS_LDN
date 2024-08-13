@@ -13,10 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Socket.Disconnect()` method is exposed by `SocksClient` and commands now.
 - Username and password authentication method
   according to [RFC 1929](https://datatracker.ietf.org/doc/html/rfc1929) ([#16]).
+- New list property (`ClientCommand.ClientEndpoints`) which contains
+  all remote client endpoints received from a proxy server.
 
 ### Changed
 
 - Remove `Is`-prefix from `SocksSession` properties.
+
+### Removed
+
+- The client command property `BindCommand.ClientEndpoint`
+  in favor of `ClientCommand.ClientEndpoints`.
 
 ### Fixed
 
