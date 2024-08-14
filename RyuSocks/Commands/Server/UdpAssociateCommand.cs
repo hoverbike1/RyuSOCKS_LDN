@@ -96,8 +96,7 @@ namespace RyuSocks.Commands.Server
 
         public override int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
-            // TODO: Use socketFlags
-            return (int)_server.Send(remoteEP, buffer);
+            return _server.Socket.SendTo(buffer, socketFlags, remoteEP);
         }
 
         public override void OnReceived(ReadOnlySpan<byte> buffer)
