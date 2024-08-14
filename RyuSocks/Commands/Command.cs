@@ -7,11 +7,17 @@ namespace RyuSocks.Commands
 {
     public abstract class Command : IWrapper
     {
+        protected readonly ProxyEndpoint ProxyEndpoint;
+
         public abstract bool HandlesCommunication { get; }
         public abstract bool UsesDatagrams { get; }
         public virtual int WrapperLength => 0;
 
-        protected readonly ProxyEndpoint ProxyEndpoint;
+        public virtual bool Blocking
+        {
+            get => throw new NotSupportedException("This command does not require a second connection, so this property must not be used.");
+            set => throw new NotSupportedException("This command does not require a second connection, so this property must not be used.");
+        }
 
         protected Command(ProxyEndpoint proxyEndpoint)
         {

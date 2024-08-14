@@ -32,6 +32,8 @@ namespace RyuSocks.Commands.Client
         //       but we usually don't need that much space.
         public override int WrapperLength => 262;
 
+        public override bool Blocking { get => _socket.Blocking; set => _socket.Blocking = value; }
+
         public UdpAssociateCommand(SocksClient client, ProxyEndpoint source) : base(client, source)
         {
             var sourceEndpoint = source.ToEndPoint();

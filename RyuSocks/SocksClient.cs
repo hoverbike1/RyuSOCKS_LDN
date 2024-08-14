@@ -52,6 +52,29 @@ namespace RyuSocks
         public SocketType SocketType => Command is { UsesDatagrams: true } ? SocketType.Dgram : SocketType.Stream;
         public ProtocolType ProtocolType => Command is { UsesDatagrams: true } ? ProtocolType.Udp : ProtocolType.Tcp;
 
+        public bool Blocking
+        {
+            get
+            {
+                if (Command is { HandlesCommunication: true })
+                {
+                    return Command.Blocking;
+                }
+
+                return _socket.Blocking;
+            }
+            set
+            {
+                if (Command is { HandlesCommunication: true })
+                {
+                    Command.Blocking = value;
+                    return;
+                }
+
+                _socket.Blocking = value;
+            }
+        }
+
         public SocksClient(IPEndPoint endpoint)
         {
             _socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

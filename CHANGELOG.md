@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `LocalEndPoint`, `ProxiedLocalEndPoint` and `ProxiedRemoteEndPoint`.
 - Minimal implementation of `GetSocketOption()` and `SetSocketOption()`
   for `SocksClient` and `Command` (in case it handles communication).
-- Minimal implementation of `Poll()` 
+- Minimal implementation of `Poll()` and `Blocking` 
   for `SocksClient` and `Command` (in case it handles communication).
 
 ### Changed
