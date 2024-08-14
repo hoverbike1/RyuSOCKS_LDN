@@ -210,6 +210,8 @@ namespace RyuSocks
 
         public void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
         {
+            // TODO: Should the command get the same socket options as _socket when it gets constructed?
+
             if (Command is { HandlesCommunication: true })
             {
                 Command.SetSocketOption(optionLevel, optionName, optionValue);
@@ -379,6 +381,16 @@ namespace RyuSocks
 
             // TODO: Set reuseSocket to true once we can handle reconnects here
             _socket.Disconnect(false);
+        }
+
+        public bool Poll(int microSeconds, SelectMode mode)
+        {
+            if (Command is { HandlesCommunication: true })
+            {
+                return Command.Poll(microSeconds, mode);
+            }
+
+            return _socket.Poll(microSeconds, mode);
         }
 
         public int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)

@@ -119,6 +119,11 @@ namespace RyuSocks.Commands.Client
             _socket.SetSocketOption(optionLevel, optionName, optionValue);
         }
 
+        public override bool Poll(int microSeconds, SelectMode mode)
+        {
+            return _socket.Poll(microSeconds, mode);
+        }
+
         public override int ReceiveFrom(Span<byte> buffer, SocketFlags socketFlags, ref EndPoint remoteEP)
         {
             int receivedBytes = 0;

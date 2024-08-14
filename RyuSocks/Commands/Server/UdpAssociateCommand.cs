@@ -89,6 +89,11 @@ namespace RyuSocks.Commands.Server
             _server.Socket.SetSocketOption(optionLevel, optionName, optionValue);
         }
 
+        public override bool Poll(int microSeconds, SelectMode mode)
+        {
+            return _server.Socket.Poll(microSeconds, mode);
+        }
+
         public override int SendTo(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, EndPoint remoteEP)
         {
             // TODO: Use socketFlags

@@ -50,6 +50,11 @@ namespace RyuSocks.Commands
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
 
+        public virtual bool Poll(int microSeconds, SelectMode mode)
+        {
+            throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
+        }
+
         public virtual int Send(ReadOnlySpan<byte> buffer, SocketFlags socketFlags, out SocketError errorCode)
         {
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
