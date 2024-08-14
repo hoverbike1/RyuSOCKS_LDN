@@ -20,42 +20,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
-The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
-
----
-
-### Added
-
-- `SocksClient.Connect()` implementation which takes an `IPEndPoint`.
-- `Socket.Disconnect()` method is exposed by `SocksClient` and commands now.
-- Username and password authentication method
-according to [RFC 1929](https://datatracker.ietf.org/doc/html/rfc1929) ([#16](https://github.com/TSRBerry/RyuSOCKS/pull/16)).
-- New list property (`ClientCommand.ClientEndpoints`) which contains
-all remote client endpoints received from a proxy server.
-- New `EndPoint` properties for `SocksClient`:
-`LocalEndPoint`, `ProxiedLocalEndPoint` and `ProxiedRemoteEndPoint`.
-- Minimal implementation of `GetSocketOption()` and `SetSocketOption()`
-for `SocksClient` and `Command` (in case it handles communication).
-- Minimal implementation of `Poll()` and `Blocking`
-for `SocksClient` and `Command` (in case it handles communication).
-
-### Changed
-
-- Remove `Is`-prefix from `SocksSession` properties.
-
-### Removed
-
-- The client command property `BindCommand.ClientEndpoint`
-in favor of `ClientCommand.ClientEndpoints`.
-
-### Fixed
-
-- `SocksClient.Dispose()` now also calls `Dispose()` for commands
-which implement `IDisposable`.
-- `UdpAssociateCommand.WrapperLength` now correctly returns the maximum amount
-of bytes required to wrap/unwrap a `UdpPacket`.
-- The send and receive methods of commands hava parameters for
-`SocketFlags` and `SocketError` now.
+            The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
         </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
