@@ -81,6 +81,11 @@ namespace RyuSocks.Commands.Server
             return packet.Bytes.Length;
         }
 
+        public override void Shutdown(SocketShutdown how)
+        {
+            _server.Socket.Shutdown(how);
+        }
+
         public override void GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
         {
             _server.Socket.GetSocketOption(optionLevel, optionName, optionValue);

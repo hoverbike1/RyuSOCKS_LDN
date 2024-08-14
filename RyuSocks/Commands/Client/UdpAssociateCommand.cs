@@ -111,6 +111,11 @@ namespace RyuSocks.Commands.Client
             _socket.Disconnect(false);
         }
 
+        public override void Shutdown(SocketShutdown how)
+        {
+            _socket.Shutdown(how);
+        }
+
         public override void GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
         {
             _socket.GetSocketOption(optionLevel, optionName, optionValue);

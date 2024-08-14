@@ -40,6 +40,11 @@ namespace RyuSocks.Commands
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
 
+        public virtual void Shutdown(SocketShutdown how)
+        {
+            throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
+        }
+
         public virtual void GetSocketOption(
             SocketOptionLevel optionLevel,
             SocketOptionName optionName,

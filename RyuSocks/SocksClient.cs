@@ -406,6 +406,17 @@ namespace RyuSocks
             _socket.Disconnect(false);
         }
 
+        public void Shutdown(SocketShutdown how)
+        {
+            if (Command is { HandlesCommunication: true })
+            {
+                Command.Shutdown(how);
+                return;
+            }
+
+            _socket.Shutdown(how);
+        }
+
         public bool Poll(int microSeconds, SelectMode mode)
         {
             if (Command is { HandlesCommunication: true })
