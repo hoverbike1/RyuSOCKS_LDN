@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <Version>0.3.1-alpha</Version>
+        <Version>0.4.0-alpha</Version>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <IsAotCompatible>true</IsAotCompatible>
         <PublishAot>true</PublishAot>
@@ -21,7 +21,18 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
-            The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
+The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
+
+---
+### Added
+
+- `Socket.Available` implementation
+for `SocksClient` and `Command` (in case it handles communication).
+- `Socket.Connected` property is exposed by `SocksClient` now.
+- A new interface `ISocket` to make managing socket
+properties and methods easier.
+- A new class `SocksClientStream` (similar to `System.Net.Socket.NetworkStream`)
+which allows working with `SocksClient`s as streams.
         </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
