@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace RyuSocks.Commands
 {
-    public abstract class Command : IWrapper
+    public abstract class Command : ISocket, IWrapper
     {
         protected readonly ProxyEndpoint ProxyEndpoint;
 

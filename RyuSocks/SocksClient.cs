@@ -29,7 +29,7 @@ using System.Net.Sockets;
 
 namespace RyuSocks
 {
-    public partial class SocksClient : IDisposable
+    public partial class SocksClient : ISocket, IDisposable
     {
         // TODO: Keep track of the connection state
 

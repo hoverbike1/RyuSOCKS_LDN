@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Socket.Available` implementation
   for `SocksClient` and `Command` (in case it handles communication).
 - `Socket.Connected` property is exposed by `SocksClient` now.
+- A new interface `ISocket` to make managing socket 
+  properties and methods easier.
 
 ## [0.3.1-alpha] - 2024-08-14
 
