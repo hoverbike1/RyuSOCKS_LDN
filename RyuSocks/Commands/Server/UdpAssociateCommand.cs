@@ -33,6 +33,7 @@ namespace RyuSocks.Commands.Server
         public override int WrapperLength => 262;
         private UdpServer _server;
 
+        public override int Available { get => _server.Socket.Available; }
         public override bool Blocking { get => _server.Socket.Blocking; set => _server.Socket.Blocking = value; }
 
         public UdpAssociateCommand(SocksSession session, IPEndPoint boundEndpoint, ProxyEndpoint source) : base(session, boundEndpoint, source)

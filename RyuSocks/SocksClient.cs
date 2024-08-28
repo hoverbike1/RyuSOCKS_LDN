@@ -52,6 +52,19 @@ namespace RyuSocks
         public SocketType SocketType => Command is { UsesDatagrams: true } ? SocketType.Dgram : SocketType.Stream;
         public ProtocolType ProtocolType => Command is { UsesDatagrams: true } ? ProtocolType.Udp : ProtocolType.Tcp;
 
+        public int Available
+        {
+            get
+            {
+                if (Command is { HandlesCommunication: true })
+                {
+                    return Command.Available;
+                }
+
+                return _socket.Available;
+            }
+        }
+
         public bool Blocking
         {
             get

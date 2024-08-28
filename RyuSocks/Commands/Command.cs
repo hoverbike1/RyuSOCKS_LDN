@@ -13,6 +13,11 @@ namespace RyuSocks.Commands
         public abstract bool UsesDatagrams { get; }
         public virtual int WrapperLength => 0;
 
+        public virtual int Available
+        {
+            get => throw new NotSupportedException("This command does not require a second connection, so this property must not be used.");
+        }
+
         public virtual bool Blocking
         {
             get => throw new NotSupportedException("This command does not require a second connection, so this property must not be used.");

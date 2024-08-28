@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Socket.Available` implementation
+  for `SocksClient` and `Command` (in case it handles communication).
+
 ## [0.3.1-alpha] - 2024-08-14
 
 ### Added
