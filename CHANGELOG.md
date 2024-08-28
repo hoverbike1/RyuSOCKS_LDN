@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Socket.Connected` property is exposed by `SocksClient` now.
 - A new interface `ISocket` to make managing socket 
   properties and methods easier.
+- A new class `SocksClientStream` (similar to `System.Net.Socket.NetworkStream`)
+  which allows working with `SocksClient`s as streams. 
 
 ## [0.3.1-alpha] - 2024-08-14
 

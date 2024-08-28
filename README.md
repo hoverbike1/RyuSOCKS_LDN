@@ -10,6 +10,7 @@ Similarly, custom implementations for authentication methods are supported as we
 ## LICENSE
 
 This software library is licensed under the terms of the GPLv2, with exemptions for specific projects noted below.
+This software library makes use of code authored by the .NET Foundation, see [THIRDPARTY.md](THIRDPARTY.md) for more details.
 
 You can find a copy of the license in the [LICENSE file](LICENSE).
 
