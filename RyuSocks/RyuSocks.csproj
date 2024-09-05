@@ -2,7 +2,7 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <Version>0.4.0-alpha</Version>
+        <Version>0.5.0-alpha</Version>
         <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
         <IsAotCompatible>true</IsAotCompatible>
         <PublishAot>true</PublishAot>
@@ -22,6 +22,21 @@
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
             The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
+
+---
+
+### Added
+
+- `Socket.SetSocketOption()` implementation taking an int as third parameter.
+- `Socket.GetSocketOption()` implementation returning an object.
+- Exposed `IsCommandAvailable` and `Authenticated` from `SocksClient`.
+- `SocksClient.WaitForCommand()` method which allows waiting until the command
+is ready for data transfer or has been accepted.
+
+### Fixed
+
+- Added lock around socket calls, so only one thread uses a socket at a time.
+- `SocksClientStream` trying to receive data while the command wasn't accepted yet.
         </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
