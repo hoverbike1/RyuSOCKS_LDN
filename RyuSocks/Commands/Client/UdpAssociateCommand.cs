@@ -88,7 +88,7 @@ namespace RyuSocks.Commands.Client
             buffer.Clear();
             packet.UserData.CopyTo(buffer);
 
-            return packet.Bytes.Length;
+            return packet.UserData.Length;
         }
 
         public override void ProcessResponse(CommandResponse response)
@@ -122,7 +122,17 @@ namespace RyuSocks.Commands.Client
             _socket.GetSocketOption(optionLevel, optionName, optionValue);
         }
 
+        public override object GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName)
+        {
+            return _socket.GetSocketOption(optionLevel, optionName);
+        }
+
         public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _socket.SetSocketOption(optionLevel, optionName, optionValue);
+        }
+
+        public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
             _socket.SetSocketOption(optionLevel, optionName, optionValue);
         }

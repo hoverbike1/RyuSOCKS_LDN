@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `Socket.SetSocketOption()` implementation taking an int as third parameter.
+- `Socket.GetSocketOption()` implementation returning an object.
+- Exposed `IsCommandAvailable` and `Authenticated` from `SocksClient`.
+- `SocksClient.WaitForCommand()` method which allows waiting until the command
+  is ready for data transfer or has been accepted.
+
+### Fixed
+
+- Added lock around socket calls, so only one thread uses a socket at a time.
+- `SocksClientStream` trying to receive data while the command wasn't accepted yet.
+
 ## [0.4.0-alpha] - 2024-08-28
 
 ### Added

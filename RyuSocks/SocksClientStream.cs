@@ -53,7 +53,7 @@ namespace RyuSocks
         // Whether Dispose has been called.
         private bool _disposed;
 
-        // Creates a new instance of the System.Net.Sockets.NetworkStream class for the specified System.Net.Sockets.Socket.
+        // Creates a new instance of the System.Net.Sockets.SocksClientStream class for the specified System.Net.Sockets.Socket.
         public SocksClientStream(SocksClient socket)
             : this(socket, FileAccess.ReadWrite, ownsSocket: false)
         {
@@ -77,7 +77,7 @@ namespace RyuSocks
             {
                 // Stream.Read*/Write* are incompatible with the semantics of non-blocking sockets, and
                 // allowing non-blocking sockets could result in non-deterministic failures from those
-                // operations. A developer that requires using NetworkStream with a non-blocking socket can
+                // operations. A developer that requires using SocksClientStream with a non-blocking socket can
                 // temporarily flip Socket.Blocking as a workaround.
                 throw new IOException("Socket is not blocking.");
             }
@@ -107,6 +107,8 @@ namespace RyuSocks
                     _writeable = true;
                     break;
             }
+
+            _socksClient.WaitForCommand(true);
         }
 
         public SocksClient SocksClient => _socksClient;
@@ -145,9 +147,7 @@ namespace RyuSocks
         {
             get
             {
-                byte[] socketOptionValue = new byte[4];
-                _socksClient.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, socketOptionValue);
-                int timeout = BitConverter.ToInt32(socketOptionValue);
+                int timeout = (int)_socksClient.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout);
                 if (timeout == 0)
                 {
                     return -1;
@@ -170,9 +170,7 @@ namespace RyuSocks
         {
             get
             {
-                byte[] socketOptionValue = new byte[4];
-                _socksClient.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, socketOptionValue);
-                int timeout = BitConverter.ToInt32(socketOptionValue);
+                int timeout = (int)_socksClient.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout);
                 if (timeout == 0)
                 {
                     return -1;
@@ -227,7 +225,7 @@ namespace RyuSocks
         }
 
         // Seeks a specific position in the stream. This method is not supported by the
-        // NetworkStream class.
+        // SocksClientStream class.
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException("Seeking is not supported.");
@@ -256,21 +254,21 @@ namespace RyuSocks
                 throw new InvalidOperationException("Write-only stream");
             }
 
-            int readBytes = _socksClient.Receive(buffer.AsSpan(offset, count), SocketFlags.None, out SocketError error);
+            int receivedSize = _socksClient.Receive(buffer.AsSpan(offset, count), SocketFlags.None, out SocketError error);
 
             if (error != SocketError.Success)
             {
                 throw WrapException(new SocketException((int)error));
             }
 
-            return readBytes;
+            return receivedSize;
         }
 
         public override int Read(Span<byte> buffer)
         {
-            if (GetType() != typeof(NetworkStream))
+            if (GetType() != typeof(SocksClientStream))
             {
-                // NetworkStream is not sealed, and a derived type may have overridden Read(byte[], int, int) prior
+                // SocksClientStream is not sealed, and a derived type may have overridden Read(byte[], int, int) prior
                 // to this Read(Span<byte>) overload being introduced.  In that case, this Read(Span<byte>) overload
                 // should use the behavior of Read(byte[],int,int) overload.
                 return base.Read(buffer);
@@ -282,14 +280,14 @@ namespace RyuSocks
                 throw new InvalidOperationException("Write-only stream");
             }
 
-            int readBytes = _socksClient.Receive(buffer, SocketFlags.None, out SocketError error);
+            int receivedSize = _socksClient.Receive(buffer, SocketFlags.None, out SocketError error);
 
             if (error != SocketError.Success)
             {
                 throw WrapException(new SocketException((int)error));
             }
 
-            return readBytes;
+            return receivedSize;
         }
 
         public override unsafe int ReadByte()
@@ -335,9 +333,9 @@ namespace RyuSocks
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            if (GetType() != typeof(NetworkStream))
+            if (GetType() != typeof(SocksClientStream))
             {
-                // NetworkStream is not sealed, and a derived type may have overridden Write(byte[], int, int) prior
+                // SocksClientStream is not sealed, and a derived type may have overridden Write(byte[], int, int) prior
                 // to this Write(ReadOnlySpan<byte>) overload being introduced.  In that case, this Write(ReadOnlySpan<byte>)
                 // overload should use the behavior of Write(byte[],int,int) overload.
                 base.Write(buffer);
@@ -361,15 +359,15 @@ namespace RyuSocks
         public override unsafe void WriteByte(byte value) =>
             Write(new ReadOnlySpan<byte>(&value, 1));
 
-        private int _closeTimeout = 0; // -1 = respect linger options
+        private int _closeTimeout; // -1 = respect linger options
 
-        /// <summary>Closes the <see cref="NetworkStream"/> after waiting the specified time to allow data to be sent.</summary>
+        /// <summary>Closes the <see cref="SocksClientStream"/> after waiting the specified time to allow data to be sent.</summary>
         /// <param name="timeout">The number of milliseconds to wait to send any remaining data before closing.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is less than -1.</exception>
         /// <remarks>
-        /// The Close method frees both unmanaged and managed resources associated with the <see cref="NetworkStream"/>.
-        /// If the <see cref="NetworkStream"/> owns the underlying <see cref="SocksClient"/>, it is closed as well.
-        /// If a <see cref="NetworkStream"/> was associated with a <see cref="TcpClient"/>, the <see cref="Close(int)"/> method
+        /// The Close method frees both unmanaged and managed resources associated with the <see cref="SocksClientStream"/>.
+        /// If the <see cref="SocksClientStream"/> owns the underlying <see cref="SocksClient"/>, it is closed as well.
+        /// If a <see cref="SocksClientStream"/> was associated with a <see cref="TcpClient"/>, the <see cref="Close(int)"/> method
         /// will close the TCP connection, but not dispose of the associated <see cref="TcpClient"/>.
         /// </remarks>
         public void Close(int timeout)
@@ -379,13 +377,13 @@ namespace RyuSocks
             Dispose();
         }
 
-        /// <summary>Closes the <see cref="NetworkStream"/> after waiting the specified time to allow data to be sent.</summary>
+        /// <summary>Closes the <see cref="SocksClientStream"/> after waiting the specified time to allow data to be sent.</summary>
         /// <param name="timeout">The amount of time to wait to send any remaining data before closing.</param>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="timeout"/> is less than -1 milliseconds or greater than <see cref="int.MaxValue"/> milliseconds.</exception>
         /// <remarks>
-        /// The Close method frees both unmanaged and managed resources associated with the <see cref="NetworkStream"/>.
-        /// If the <see cref="NetworkStream"/> owns the underlying <see cref="SocksClient"/>, it is closed as well.
-        /// If a <see cref="NetworkStream"/> was associated with a <see cref="TcpClient"/>, the <see cref="Close(int)"/> method
+        /// The Close method frees both unmanaged and managed resources associated with the <see cref="SocksClientStream"/>.
+        /// If the <see cref="SocksClientStream"/> owns the underlying <see cref="SocksClient"/>, it is closed as well.
+        /// If a <see cref="SocksClientStream"/> was associated with a <see cref="TcpClient"/>, the <see cref="Close(int)"/> method
         /// will close the TCP connection, but not dispose of the associated <see cref="TcpClient"/>.
         /// </remarks>
         public void Close(TimeSpan timeout) => Close(ToTimeoutMilliseconds(timeout));
@@ -591,7 +589,7 @@ namespace RyuSocks
         //         return _socksClient.ReceiveAsync(
         //             new Memory<byte>(buffer, offset, count),
         //             SocketFlags.None,
-        //             fromNetworkStream: true,
+        //             fromSocksClientStream: true,
         //             cancellationToken).AsTask();
         //     }
         //     catch (Exception exception) when (!(exception is OutOfMemoryException))
@@ -614,7 +612,7 @@ namespace RyuSocks
         //         return _socksClient.ReceiveAsync(
         //             buffer,
         //             SocketFlags.None,
-        //             fromNetworkStream: true,
+        //             fromSocksClientStream: true,
         //             cancellationToken: cancellationToken);
         //     }
         //     catch (Exception exception) when (!(exception is OutOfMemoryException))
@@ -649,7 +647,7 @@ namespace RyuSocks
         //
         //     try
         //     {
-        //         return _socksClient.SendAsyncForNetworkStream(
+        //         return _socksClient.SendAsyncForSocksClientStream(
         //             new ReadOnlyMemory<byte>(buffer, offset, count),
         //             SocketFlags.None,
         //             cancellationToken).AsTask();
@@ -671,7 +669,7 @@ namespace RyuSocks
         //
         //     try
         //     {
-        //         return _socksClient.SendAsyncForNetworkStream(
+        //         return _socksClient.SendAsyncForSocksClientStream(
         //             buffer,
         //             SocketFlags.None,
         //             cancellationToken);
@@ -711,7 +709,7 @@ namespace RyuSocks
             {
                 if (timeout != _currentWriteTimeout)
                 {
-                    _socksClient.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, BitConverter.GetBytes(timeout));
+                    _socksClient.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, timeout);
                     _currentWriteTimeout = timeout;
                 }
             }
@@ -720,7 +718,7 @@ namespace RyuSocks
             {
                 if (timeout != _currentReadTimeout)
                 {
-                    _socksClient.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, BitConverter.GetBytes(timeout));
+                    _socksClient.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeout);
                     _currentReadTimeout = timeout;
                 }
             }

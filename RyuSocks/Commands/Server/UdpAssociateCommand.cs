@@ -79,7 +79,7 @@ namespace RyuSocks.Commands.Server
             buffer.Clear();
             packet.UserData.CopyTo(buffer);
 
-            return packet.Bytes.Length;
+            return packet.UserData.Length;
         }
 
         public override void Shutdown(SocketShutdown how)
@@ -92,7 +92,17 @@ namespace RyuSocks.Commands.Server
             _server.Socket.GetSocketOption(optionLevel, optionName, optionValue);
         }
 
+        public override object GetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName)
+        {
+            return _server.Socket.GetSocketOption(optionLevel, optionName);
+        }
+
         public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, byte[] optionValue)
+        {
+            _server.Socket.SetSocketOption(optionLevel, optionName, optionValue);
+        }
+
+        public override void SetSocketOption(SocketOptionLevel optionLevel, SocketOptionName optionName, int optionValue)
         {
             _server.Socket.SetSocketOption(optionLevel, optionName, optionValue);
         }

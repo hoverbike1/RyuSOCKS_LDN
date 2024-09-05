@@ -31,13 +31,13 @@ namespace RyuSocks.Commands
 
         public virtual int Wrap(Span<byte> packet, int packetLength, ProxyEndpoint remoteEndpoint)
         {
-            return 0;
+            return packetLength;
         }
 
         public virtual int Unwrap(Span<byte> packet, int packetLength, out ProxyEndpoint remoteEndpoint)
         {
             remoteEndpoint = ProxyEndpoint;
-            return 0;
+            return packetLength;
         }
 
         public virtual void Disconnect()
@@ -58,10 +58,25 @@ namespace RyuSocks.Commands
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
 
+        public virtual object GetSocketOption(
+            SocketOptionLevel optionLevel,
+            SocketOptionName optionName)
+        {
+            throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
+        }
+
         public virtual void SetSocketOption(
             SocketOptionLevel optionLevel,
             SocketOptionName optionName,
             byte[] optionValue)
+        {
+            throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
+        }
+
+        public virtual void SetSocketOption(
+            SocketOptionLevel optionLevel,
+            SocketOptionName optionName,
+            int optionValue)
         {
             throw new NotSupportedException("This command does not require a second connection, so this method must not be called.");
         }
