@@ -92,6 +92,24 @@ namespace RyuSocks
             }
         }
 
+        public bool IsBound
+        {
+            get
+            {
+                if (ProxiedLocalEndPoint != null)
+                {
+                    return true;
+                }
+
+                if (RequestCommand != 0)
+                {
+                    return _socket.IsBound;
+                }
+
+                return false;
+            }
+        }
+
         public SocksClient(IPEndPoint endpoint)
         {
             _socket = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
