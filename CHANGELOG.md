@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0-alpha] - 2024-09-24
+
 ### Added
 
 - `Socket.IsBound` implementation for `SocksClient`.
@@ -130,7 +132,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configurable SOCKS commands.
 - Configurable allow and block lists.
 
-[Unreleased]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.5.0-alpha...HEAD
+[Unreleased]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.6.0-alpha...HEAD
+[0.6.0-alpha]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.5.0-alpha...v0.6.0-alpha
 [0.5.0-alpha]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.4.0-alpha...v0.5.0-alpha
 [0.4.0-alpha]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.3.1-alpha...v0.4.0-alpha
 [0.3.1-alpha]: https://github.com/TSRBerry/RyuSOCKS/compare/v0.3.0-alpha...v0.3.1-alpha
