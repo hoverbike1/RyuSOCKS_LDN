@@ -21,7 +21,7 @@
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
-            The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
+The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
         </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
