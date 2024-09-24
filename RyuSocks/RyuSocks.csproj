@@ -22,12 +22,6 @@
         <PackageIcon>icon.png</PackageIcon>
         <PackageReleaseNotes>
 The full changelog is available at: https://github.com/TSRBerry/RyuSOCKS/blob/master/CHANGELOG.md
-
----
-
-### Added
-
-- `Socket.IsBound` implementation for `SocksClient`.
         </PackageReleaseNotes>
         <PackageLicenseExpression>GPL-2.0-only</PackageLicenseExpression>
         <IncludeSymbols>true</IncludeSymbols>
